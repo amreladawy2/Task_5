@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
-import { api } from '../api'
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { api } from '../api';
 
 // Category color schemes with gradient backgrounds and accent colors
 const categoryThemes = {
@@ -44,31 +44,39 @@ const categoryThemes = {
     iconColor: 'text-gray-500',
     accentText: 'text-gray-600'
   }
-}
+};
 
 export default function PerkDetails() {
-  const nav = useNavigate()
-  const { id } = useParams()
-  const [perk, setPerk] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const nav = useNavigate();
+  const { id } = useParams();
+  const [perk, setPerk] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     api.get('/perks/' + id)
       .then(res => {
-        setPerk(res.data.perk)
-        setLoading(false)
+        setPerk(res.data.perk);
+        setLoading(false);
       })
       .catch(err => {
-        setError(err?.response?.data?.message || 'Failed to load perk')
-        setLoading(false)
-      })
-  }, [id])
+        setError(err?.response?.data?.message || 'Failed to load perk');
+        setLoading(false);
+      });
+  }, [id]);
 
- // TODO 2: Implement delete functionality with a window confirm dialog 
+  // Delete functionality with a window confirm dialog
   async function handleDelete() {
-   
+    if (!window.confirm('Are you sure you want to delete this perk?')) return;
+
+    try {
+      await api.delete('/perks/' + id);
+      alert('Perk deleted successfully');
+      nav('/perks'); // Navigate back to the perks list after deletion
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to delete perk');
+    }
   }
 
   if (loading) {
@@ -76,7 +84,7 @@ export default function PerkDetails() {
       <div className="max-w-3xl mx-auto">
         <div className="text-center py-12 text-zinc-600">Loading...</div>
       </div>
-    )
+    );
   }
 
   if (error || !perk) {
@@ -87,13 +95,12 @@ export default function PerkDetails() {
           <Link to="/perks" className="btn">Back to Perks</Link>
         </div>
       </div>
-    )
+    );
   }
 
-  const theme = categoryThemes[perk.category] || categoryThemes.other
+  const theme = categoryThemes[perk.category] || categoryThemes.other;
 
   return (
-    //TODO 3: Implement delete perk handler
     <div className="max-w-3xl mx-auto">
       {/* Back button */}
       <div className="mb-4">
@@ -192,7 +199,7 @@ export default function PerkDetails() {
             Edit Perk
           </Link>
           <button
-            
+            onClick={handleDelete} // Attach the delete handler here
             className="btn bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 font-semibold px-6 py-3 flex items-center gap-2"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
@@ -201,5 +208,5 @@ export default function PerkDetails() {
         </div>
       </div>
     </div>
-  )
+  );
 }
